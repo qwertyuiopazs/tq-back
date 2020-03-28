@@ -18,6 +18,22 @@
         >
           批量删除
         </el-button>
+        <el-select v-model="value" placeholder="请选择">
+          <el-option
+            v-for="(item, index) in leagueTypeList"
+            :key="index"
+            :label="item.leagueName"
+            :value="item.id"
+          >
+          </el-option>
+        </el-select>
+        <el-button
+          @click="getScheduleListDtail()"
+          :style="{ marginBottom: '15px' }"
+          type="primary"
+        >
+          搜索
+        </el-button>
         <el-table
           :data="scheduleList"
           border
@@ -101,6 +117,19 @@
         </div>
 
         <el-form ref="form" :model="form" label-width="100px">
+          <el-form-item label="联赛类型：" :style="{ width: '300px' }"
+            ><el-select v-model="form.leagueTypeId" placeholder="请选择">
+              <el-option
+                v-for="(item, index) in leagueTypeList"
+                :key="index"
+                :disabled="item.leagueName === '全部'"
+                :label="item.leagueName"
+                :value="item.id"
+              >
+              </el-option>
+            </el-select>
+          </el-form-item>
+
           <el-form-item label="比赛时间：" :style="{ width: '300px' }">
             <el-date-picker
               v-model="form.gameTime"
@@ -172,7 +201,7 @@
 
 <script>
 import _ from "lodash";
-import { mapActions, mapState } from "vuex";
+import { mapActions, mapState, mapMutations } from "vuex";
 import {
   addGameSchedule,
   delGameSchedule,
@@ -188,7 +217,7 @@ export default {
       pageSize: 10,
       dialogVisible: false,
       multipleSelection: [],
-
+      value: "", // 搜索选项
       form: {
         gameName: "",
         gameTime: "",
@@ -196,7 +225,8 @@ export default {
         teamOne: "",
         teamOneUrl: "",
         teamTwo: "",
-        teamTwoUrl: ""
+        teamTwoUrl: "",
+        leagueTypeId: ""
       },
 
       // 是否再编辑状态
@@ -226,13 +256,22 @@ export default {
       scheduleList: state => {
         const { records = [] } = state.schedule.scheduleInfo;
         return records;
+      },
+      leagueTypeList: state => {
+        const { records = [] } = state.schedule.scheduleTypeInfo;
+        records.unshift({ leagueName: "全部", id: "" });
+        return records;
       }
     })
   },
 
   methods: {
     ...mapActions({
-      getGameSchedulePage: "schedule/getGameSchedulePage"
+      getGameSchedulePage: "schedule/getGameSchedulePage",
+      getLeagueTypePage: "schedule/getLeagueTypePage"
+    }),
+    ...mapMutations({
+      resetSchedule: "schedule/SCHEDULETYPE_INFO"
     }),
     resetAllStatus() {
       this.form = {
@@ -242,16 +281,21 @@ export default {
         teamOne: "",
         teamOneUrl: "",
         teamTwo: "",
-        teamTwoUrl: ""
+        teamTwoUrl: "",
+        leagueTypeId: ""
       };
       this.isEdit = false;
     },
     getScheduleListDtail() {
-      const { pageNum, pageSize } = this;
-      this.getGameSchedulePage({
+      const { pageNum, pageSize, value } = this;
+      const param = {
         pageNum,
         pageSize
-      });
+      };
+      if (value !== "") {
+        param.leagueTypeId = value;
+      }
+      this.getGameSchedulePage(param);
     },
     handleEdit(row) {
       const data = _.cloneDeep(row);
@@ -320,12 +364,20 @@ export default {
         teamOne,
         teamOneUrl,
         teamTwoUrl,
-        teamTwo
+        teamTwo,
+        leagueTypeId
       } = this.form;
 
       if (!gameName) {
         this.$message({
           message: "填写比赛名称",
+          type: "error"
+        });
+        return;
+      }
+      if (!leagueTypeId) {
+        this.$message({
+          message: "请选择联赛",
           type: "error"
         });
         return;
@@ -442,6 +494,10 @@ export default {
   },
   mounted() {
     this.getScheduleListDtail();
+    this.getLeagueTypePage({ pageNum: 1, pageSize: 100 });
+  },
+  destroyed() {
+    this.resetSchedule({});
   }
 };
 </script>
