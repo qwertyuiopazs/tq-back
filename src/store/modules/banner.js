@@ -1,12 +1,21 @@
-import { getBannerList, delBanner, addBanner } from "@/api/banner";
+import {
+  getBannerList,
+  delBanner,
+  addBanner,
+  getAllEveryDayBanner
+} from "@/api/banner";
 
 const state = {
-  bannerList: []
+  bannerList: [],
+  everyPageBanner: []
 };
 
 const mutations = {
   BANNER_LIST: (state, lsit) => {
     state.bannerList = lsit;
+  },
+  EVERY_PAGE_BANNER: (state, lsit) => {
+    state.everyPageBanner = lsit;
   }
 };
 
@@ -39,6 +48,21 @@ const actions = {
       addBanner(url)
         .then(res => {
           resolve(res);
+        })
+        .catch(error => {
+          reject(error);
+        });
+    });
+  },
+
+  // 获取分页情况的全部banner
+  getAllEveryDayBanner({ commit }) {
+    return new Promise((resolve, reject) => {
+      getAllEveryDayBanner()
+        .then(data => {
+          const list = data.data ? data.data : [];
+          commit("EVERY_PAGE_BANNER", list);
+          resolve();
         })
         .catch(error => {
           reject(error);

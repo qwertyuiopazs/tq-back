@@ -29,6 +29,7 @@ export function uploadImage(data = {}) {
     }
   });
 }
+
 export function addBanner(url = "") {
   return request({
     url: "/promote/backstage/banner/addBanner",
@@ -36,5 +37,40 @@ export function addBanner(url = "") {
     data: {
       bannerUrl: url
     }
+  });
+}
+
+// 添加banner 按页处理
+export function addEveryDayBanner(data = {}) {
+  return request({
+    url: "/promote/backstage/everyDayBanner/addEveryDayBanner",
+    method: "post",
+    data
+  });
+}
+// 删除banner 按页处理
+export function delEveryDayBanner(data = []) {
+  return request({
+    url: "/promote/backstage/everyDayBanner/delEveryDayBanner",
+    method: "post",
+    data: {
+      idList: data
+    }
+  });
+}
+// 获取全部banner 按页处理
+export function getAllEveryDayBanner(data = {}) {
+  return request({
+    url: "/promote/backstage/everyDayBanner/getAllEveryDayBanner",
+    method: "post",
+    data
+  });
+}
+// 修改banner 按页处理
+export function updateEveryDayBanner(data = {}) {
+  return request({
+    url: "/promote/backstage/everyDayBanner/updateEveryDayBanner",
+    method: "post",
+    data
   });
 }

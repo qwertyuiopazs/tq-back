@@ -1,25 +1,62 @@
 <template>
-  <div class="banner_wrap">
+  <div class="main_banner_wrap">
     <el-row>
       <el-col :offset="2" :span="18">
         <h1>设置banner</h1>
-
         <el-card>
-          <div class="upload_wrap">
-            <el-upload
-              class="upload-demo"
-              :action="'/promote/tools/uploadImage'"
-              :on-change="handleChange"
-              :file-list="fileList"
-              :on-success="onSuccess"
-              :code="onError"
+          <div class="up_btn_wrap">
+            <el-button type="danger" @click="showAdd(true)" class="button"
+              >上传图片</el-button
             >
-              <el-button size="small" type="primary">点击上传</el-button>
-              <div slot="tip" class="el-upload__tip">
-                只能上传jpg/png文件
-              </div>
-            </el-upload>
           </div>
+
+          <el-dialog
+            title="添加banner"
+            :visible.sync="dialogVisible"
+            width="600px"
+            :before-close="handleClose"
+          >
+            <div class="dialog_wrap">
+              <div class="upload_wrap">
+                <p class="label_wrap">banner</p>
+                <el-upload
+                  class="avatar-uploader"
+                  action="/promote/tools/uploadImage"
+                  :show-file-list="false"
+                  :on-success="onSuccess"
+                >
+                  <img
+                    v-if="form.bannerUrl"
+                    :src="form.bannerUrl"
+                    class="avatar"
+                  />
+                  <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+                </el-upload>
+              </div>
+
+              <div>
+                <el-select v-model="form.pageName" placeholder="请选择页面">
+                  <el-option
+                    v-for="item in options"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value"
+                  >
+                  </el-option>
+                </el-select>
+                <br />
+                <br />
+                <br />
+                <el-button v-if="!isEdit" type="primary" @click="onSubmit"
+                  >立即添加</el-button
+                >
+                <el-button v-else type="primary" @click="onSubmit"
+                  >立即修改</el-button
+                >
+                <el-button @click="showAdd(false)">取消</el-button>
+              </div>
+            </div>
+          </el-dialog>
         </el-card>
       </el-col>
     </el-row>
@@ -48,7 +85,7 @@
       <el-row>
         <el-col
           :span="8"
-          v-for="(item, index) in bannerList"
+          v-for="(item, index) in everyPageBanner"
           :key="index"
           :offset="2"
           :style="{ marginTop: '15px' }"
@@ -60,13 +97,17 @@
             :style="{ backgroundColor: renderColor(item.id) }"
           >
             <img :src="item.bannerUrl" alt="" />
-            <div v-if="isDel" style="padding: 14px;">
+            <div style="padding: 14px;">
               <div class="bottom clearfix">
                 <el-button
+                  v-if="isDel"
                   type="primary"
                   @click="selectDel(item.id)"
                   class="button"
                   >删除</el-button
+                >
+                <el-button type="primary" class="button" @click="onisEdit(item)"
+                  >修改</el-button
                 >
               </div>
             </div>
@@ -80,32 +121,78 @@
 <script>
 import _ from "lodash";
 import { mapActions, mapGetters } from "vuex";
-
+import {
+  addEveryDayBanner,
+  delEveryDayBanner,
+  updateEveryDayBanner
+} from "@/api/banner";
 export default {
   name: "Banner",
   data() {
     return {
       fileList: [],
       isDel: false,
-      selectedList: []
+      selectedList: [],
+      isEdit: false, // 编辑状态
+      dialogVisible: false,
+      options: [
+        {
+          value: "home",
+          label: "首页"
+        },
+        {
+          value: "vip",
+          label: "vip推手页面"
+        },
+        {
+          value: "shili",
+          label: "实力推手页面"
+        },
+        {
+          value: "todayCompetition",
+          label: "今日赛程"
+        },
+        {
+          value: "analyze",
+          label: "盘口分析"
+        }
+      ],
+      form: {
+        pageName: "",
+        bannerUrl: ""
+      }
     };
   },
   computed: {
-    ...mapGetters(["bannerList"])
+    ...mapGetters(["everyPageBanner"])
   },
   watch: {
     isDel(val, prevVal) {
       if (val === false) {
         this.selectedList = [];
       }
+    },
+    dialogVisible(val, prevVal) {
+      if (val === false) {
+        // 弹窗关闭，重置状态
+        this.resetAllStatus();
+      }
     }
   },
   methods: {
     ...mapActions({
       delBanner: "banner/delBanner",
-      getBannerList: "banner/getBannerList",
-      addBanner: "banner/addBanner"
+      getAllEveryDayBanner: "banner/getAllEveryDayBanner"
     }),
+
+    // 还原设置
+    resetAllStatus() {
+      this.isEdit = false;
+      this.form = {
+        pageName: "",
+        bannerUrl: ""
+      };
+    },
     handleDelete() {
       if (this.selectedList.length === 0) {
         this.$message({
@@ -114,9 +201,9 @@ export default {
         });
         return;
       }
-      this.delBanner(this.selectedList)
+      this.delEveryDayBanner(this.selectedList)
         .then(() => {
-          this.getBannerList();
+          this.getAllEveryDayBanner();
           this.selectedList = [];
           this.isDel = false;
         })
@@ -125,15 +212,15 @@ export default {
         });
     },
 
+    onisEdit(item) {
+      this.dialogVisible = true;
+      this.isEdit = true;
+      this.form = item;
+    },
+
     onSuccess(response, file, fileList) {
       if (response && response.code === 200) {
-        this.addBanner(response.msg).then(data => {
-          this.$message({
-            message: data.msg,
-            type: "success"
-          });
-          this.getBannerList();
-        });
+        this.form.bannerUrl = response.msg;
       } else {
         this.$message.success(response.msg);
       }
@@ -142,6 +229,11 @@ export default {
       if (response) {
         this.$message.error(response.msg);
       }
+    },
+
+    // 关闭弹窗
+    handleClose(done) {
+      done();
     },
 
     handleChange(file, fileList) {
@@ -154,6 +246,7 @@ export default {
     renderColor(id) {
       return this.selectedList.includes(id) ? "#666" : "#fff";
     },
+
     selectDel(id) {
       if (this.selectedList.includes(id)) {
         const list = _.cloneDeep(this.selectedList);
@@ -161,31 +254,126 @@ export default {
       } else {
         this.selectedList.push(id);
       }
+    },
+
+    showAdd(bool) {
+      this.dialogVisible = bool;
+    },
+
+    // 添加或修改
+    onSubmit() {
+      const { isEdit = false } = this;
+      const { pageName = "", bannerUrl = "" } = this.form;
+      console.log(pageName, bannerUrl);
+
+      if (!pageName) {
+        this.$message({
+          message: "请选择页面",
+          type: "error"
+        });
+        return;
+      }
+      if (!bannerUrl) {
+        this.$message({
+          message: "请上传图片",
+          type: "error"
+        });
+        return;
+      }
+
+      if (isEdit) {
+        updateEveryDayBanner(this.form)
+          .then(() => {
+            this.$message({
+              message: "修改成功",
+              type: "success"
+            });
+            this.getAllEveryDayBanner();
+            // 重置状态
+            this.dialogVisible = false;
+          })
+          .catch(error => {
+            this.$message({
+              message: error.msg,
+              type: "error"
+            });
+          });
+      } else {
+        addEveryDayBanner(this.form)
+          .then(() => {
+            this.$message({
+              message: "添加成功",
+              type: "success"
+            });
+            this.getAllEveryDayBanner();
+            // 重置状态
+            this.dialogVisible = false;
+          })
+          .catch(error => {
+            //
+          });
+      }
     }
   },
   mounted() {
-    this.getBannerList();
+    this.getAllEveryDayBanner();
   }
 };
 </script>
 
-<style lang="scss" scoped>
-.banner_wrap {
+<style lang="scss">
+.main_banner_wrap {
+  margin-top: 30px;
   height: 100%;
   padding-bottom: 50px;
+
+  .up_btn_wrap {
+    padding: 40px 0;
+    text-align: center;
+  }
   h1 {
     text-align: center;
   }
-}
 
-.upload_wrap {
-  width: 600px;
-  margin: 0 auto;
-  padding: 50px 0;
-  text-align: center;
-}
-
-.banner_wrap {
-  margin-top: 30px;
+  // 对话框
+  .dialog_wrap {
+    text-align: center;
+    .upload_wrap {
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      margin-bottom: 22px;
+      .label_wrap {
+        width: 100px;
+        padding-right: 12px;
+        font-weight: bold;
+        text-align: right;
+      }
+    }
+  }
+  // 上传
+  .avatar-uploader .el-upload {
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .avatar-uploader .el-upload:hover {
+    border-color: #409eff;
+  }
+  .avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 50px;
+    height: 50px;
+    line-height: 50px;
+    text-align: center;
+  }
+  .avatar {
+    width: 50px;
+    height: 50px;
+    display: block;
+  }
 }
 </style>
