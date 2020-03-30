@@ -5,7 +5,7 @@
         <h1>设置banner</h1>
         <el-card>
           <div class="up_btn_wrap">
-            <el-button type="danger" @click="showAdd(true)" class="button"
+            <el-button type="primary" @click="showAdd(true)" class="button"
               >上传图片</el-button
             >
           </div>
@@ -16,7 +16,7 @@
             width="600px"
             :before-close="handleClose"
           >
-            <div class="dialog_wrap">
+            <div class="dialog_wrap" v-loading="fullscreenLoading">
               <div class="upload_wrap">
                 <p class="label_wrap">banner</p>
                 <el-upload
@@ -24,6 +24,7 @@
                   action="/promote/tools/uploadImage"
                   :show-file-list="false"
                   :on-success="onSuccess"
+                  :before-upload="beforeUpload"
                 >
                   <img
                     v-if="form.bannerUrl"
@@ -96,12 +97,17 @@
             }"
             :style="{ backgroundColor: renderColor(item.id) }"
           >
-            <img :src="item.bannerUrl" alt="" />
-            <div style="padding: 14px;">
+            <div
+              :style="{ backgroundImage: `url(${item.bannerUrl})` }"
+              class="banner_item_img_wrap"
+            ></div>
+
+            <div class="banner_item_wrap" style="padding: 14px;">
+              <h1>{{ item.pageName | bannerFillter }}</h1>
               <div class="bottom clearfix">
                 <el-button
                   v-if="isDel"
-                  type="primary"
+                  type="danger"
                   @click="selectDel(item.id)"
                   class="button"
                   >删除</el-button
@@ -123,45 +129,60 @@ import _ from "lodash";
 import { mapActions, mapGetters } from "vuex";
 import {
   addEveryDayBanner,
-  delEveryDayBanner,
-  updateEveryDayBanner
+  updateEveryDayBanner,
+  delEveryDayBanner
 } from "@/api/banner";
+
+const options = [
+  {
+    value: "home",
+    label: "首页"
+  },
+  {
+    value: "vip",
+    label: "vip推手页面"
+  },
+  {
+    value: "shili",
+    label: "实力推手页面"
+  },
+  {
+    value: "todayCompetition",
+    label: "今日赛程"
+  },
+  {
+    value: "analyze",
+    label: "盘口分析"
+  }
+];
+
 export default {
   name: "Banner",
   data() {
     return {
+      fullscreenLoading: false,
       fileList: [],
       isDel: false,
       selectedList: [],
       isEdit: false, // 编辑状态
       dialogVisible: false,
-      options: [
-        {
-          value: "home",
-          label: "首页"
-        },
-        {
-          value: "vip",
-          label: "vip推手页面"
-        },
-        {
-          value: "shili",
-          label: "实力推手页面"
-        },
-        {
-          value: "todayCompetition",
-          label: "今日赛程"
-        },
-        {
-          value: "analyze",
-          label: "盘口分析"
-        }
-      ],
+      options: options,
       form: {
         pageName: "",
         bannerUrl: ""
       }
     };
+  },
+  filters: {
+    bannerFillter: pageName => {
+      let res = "";
+      options.forEach((item, index) => {
+        if (item.value === pageName) {
+          res = item.label;
+        }
+      });
+      return res;
+    }
   },
   computed: {
     ...mapGetters(["everyPageBanner"])
@@ -201,11 +222,15 @@ export default {
         });
         return;
       }
-      this.delEveryDayBanner(this.selectedList)
+      delEveryDayBanner(this.selectedList)
         .then(() => {
           this.getAllEveryDayBanner();
           this.selectedList = [];
           this.isDel = false;
+          this.$message({
+            message: "上传成功",
+            type: "success"
+          });
         })
         .catch(err => {
           console.log(err);
@@ -218,7 +243,20 @@ export default {
       this.form = item;
     },
 
+    // 上传前 loading
+    beforeUpload() {
+      this.fullscreenLoading = true;
+      this.$message({
+        message: "正在上传",
+        type: "info"
+      });
+    },
     onSuccess(response, file, fileList) {
+      this.fullscreenLoading = false;
+      this.$message({
+        message: "上传成功",
+        type: "success"
+      });
       if (response && response.code === 200) {
         this.form.bannerUrl = response.msg;
       } else {
@@ -333,6 +371,20 @@ export default {
   }
   h1 {
     text-align: center;
+  }
+
+  .banner_item_wrap {
+    h1 {
+      text-align: left;
+      margin: 5px 0 15px;
+    }
+  }
+  .banner_item_img_wrap {
+    width: 100%;
+    padding-top: 40%;
+    background-size: contain;
+    background-position: center top;
+    background-repeat: no-repeat;
   }
 
   // 对话框
