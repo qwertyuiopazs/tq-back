@@ -69,6 +69,20 @@
           <el-form-item label="分析标题" :style="{ width: '300px' }">
             <el-input v-model="form.title"></el-input>
           </el-form-item>
+          <!-- upload -->
+          <el-form-item label="封面图：">
+            <el-upload
+              class="avatar-uploader"
+              action="/promote/tools/uploadImage"
+              :show-file-list="false"
+              :on-success="handleT1Success"
+              :before-upload="beforeQrUpload"
+            >
+              <img v-if="form.imagePath" :src="form.imagePath" class="avatar" />
+              <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+            </el-upload>
+          </el-form-item>
+
           <!-- content -->
           <el-form-item label="分析标题">
             <MainEditor
@@ -130,7 +144,8 @@ export default {
       multipleSelection: [],
       form: {
         analysisContent: "",
-        title: ""
+        title: "",
+        imagePath: ""
       },
       // 是否再编辑状态
       isEdit: false,
@@ -164,7 +179,8 @@ export default {
     resetAllStatus() {
       this.form = {
         analysisContent: "",
-        title: ""
+        title: "",
+        imagePath: ""
       };
       this.isEdit = false;
       window.tinymce.activeEditor.setContent("");
@@ -182,6 +198,23 @@ export default {
       this.isEdit = true;
       window.scrollTo(0, document.documentElement.clientHeight);
       window.tinymce.activeEditor.setContent(this.form.analysisContent);
+    },
+
+    // 上传封面图
+    handleT1Success(res, file) {
+      if (res && res.code === 200) {
+        this.form.imagePath = res.msg ? res.msg : "";
+        this.$message({ type: "success", message: "图片上传成功" });
+      } else {
+        this.$message.error(res.msg);
+      }
+    },
+    beforeQrUpload(file) {
+      const isLt1M = file.size / 1024 / 1024 < 2;
+      if (!isLt1M) {
+        this.$message.error("封面图大小不能超过 2MB!");
+      }
+      return isLt1M;
     },
 
     // 预览
@@ -239,7 +272,7 @@ export default {
     onSubmit() {
       const { isEdit = false } = this;
       // 提交
-      const { title, analysisContent } = this.form;
+      const { title = "", analysisContent = "", imagePath = "" } = this.form;
 
       if (!title) {
         this.$message({
@@ -251,6 +284,13 @@ export default {
       if (!analysisContent) {
         this.$message({
           message: "未填写任何内容！",
+          type: "error"
+        });
+        return;
+      }
+      if (!imagePath) {
+        this.$message({
+          message: "请上传封面图片",
           type: "error"
         });
         return;
@@ -355,6 +395,31 @@ export default {
         text-align: right;
       }
     }
+  }
+
+  // 上传
+  .avatar-uploader .el-upload {
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .avatar-uploader .el-upload:hover {
+    border-color: #409eff;
+  }
+  .avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 50px;
+    height: 50px;
+    line-height: 50px;
+    text-align: center;
+  }
+  .avatar {
+    width: 50px;
+    height: 50px;
+    display: block;
   }
 }
 </style>
