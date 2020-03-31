@@ -76,3 +76,38 @@ export function updateAnalysisContent(data = {}) {
     data
   });
 }
+
+// 分析师对应战绩
+export function addPromoteGameRecord(data = {}) {
+  return request({
+    url: "/promote/backstage/promoteGameRecord/addPromoteGameRecord",
+    method: "post",
+    data
+  });
+}
+
+export function delPromoteGameRecord(idList = []) {
+  return request({
+    url: "/promote/backstage/promoteGameRecord/delPromoteGameRecord",
+    method: "post",
+    data: {
+      idList
+    }
+  });
+}
+
+export function getPromoteGameRecord(data = {}) {
+  return request({
+    url: "/promote/backstage/promoteGameRecord/getPromoteGameRecord",
+    method: "post",
+    data
+  });
+}
+
+export function updatePromoteGameRecord(data = {}) {
+  return request({
+    url: "/promote/backstage/promoteGameRecord/updatePromoteGameRecord",
+    method: "post",
+    data
+  });
+}

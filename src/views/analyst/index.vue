@@ -60,7 +60,6 @@
               }}</span>
             </template>
           </el-table-column>
-
           <el-table-column label="操作">
             <template slot-scope="scope">
               <el-button size="mini" @click="handleEdit(scope.row)"
@@ -71,6 +70,12 @@
                 type="danger"
                 @click="handleDeleteSingle(scope.row)"
                 >删除</el-button
+              >
+              <el-button
+                type="primary"
+                size="mini"
+                @click="showExploitsDetail(scope.row)"
+                >战绩管理</el-button
               >
             </template>
           </el-table-column>
@@ -88,12 +93,7 @@
         </div>
       </el-card>
     </div>
-    <el-dialog
-      title="添加分析师"
-      :visible.sync="dialogVisible"
-      width="600px"
-      :before-close="handleClose"
-    >
+    <el-dialog title="添加分析师" :visible.sync="dialogVisible" width="600px">
       <div class="dialog_wrap">
         <div class="upload_wrap">
           <p class="label_wrap">头像</p>
@@ -154,17 +154,25 @@
         </el-form>
       </div>
     </el-dialog>
+    <exploits
+      :analystId="analystId"
+      @closeDialog="closeDialog"
+      v-if="exploitsVisible"
+    />
   </div>
 </template>
 
 <script>
 import _ from "lodash";
+import Exploits from "./exploits";
 import { mapActions, mapState } from "vuex";
 import { addAnalyst, delAnalyst, updateAnalyst } from "@/api/analyst";
 
 export default {
   name: "analyst",
-
+  components: {
+    Exploits
+  },
   data() {
     return {
       pageNum: 1,
@@ -184,9 +192,12 @@ export default {
         recentFiveTimes: "",
         vipGradeAnalyst: ""
       },
-
       // 是否再编辑状态
-      isEdit: false
+      isEdit: false,
+
+      // 分析师对应战绩
+      exploitsVisible: false,
+      analystId: -1
     };
   },
   watch: {
@@ -250,13 +261,8 @@ export default {
       this.dialogVisible = true;
       this.isEdit = true;
     },
-
     showAdd(bool) {
       this.dialogVisible = bool;
-    },
-
-    handleClose(done) {
-      done();
     },
     // 删除单个
     handleDeleteSingle(row) {
@@ -264,12 +270,10 @@ export default {
       arr.push(row.id);
       this.handleDeleteBatch(arr);
     },
-
     // 批量删除
     handleDeleteMultiple() {
       this.handleDeleteBatch(this.multipleSelection, true);
     },
-
     // 删除
     handleDeleteBatch(list, isMultiple = false) {
       this.$confirm("确认删除？", {
@@ -290,7 +294,6 @@ export default {
         })
         .catch(() => {});
     },
-
     handleSelectionChange(val) {
       const arr = [];
       if (val && val.length) {
@@ -300,7 +303,6 @@ export default {
       }
       this.multipleSelection = arr;
     },
-
     onSubmit() {
       const { isEdit = false } = this;
       // 提交
@@ -391,7 +393,6 @@ export default {
           });
       }
     },
-
     // 上传头像
     handleAvatarSuccess(res, file) {
       this.imageUrl = URL.createObjectURL(file.raw);
@@ -405,7 +406,6 @@ export default {
       }
       return isLt2M;
     },
-
     // 上传二维码
     handleQrSuccess(res, file) {
       this.qrUrl = URL.createObjectURL(file.raw);
@@ -423,6 +423,15 @@ export default {
     pagenatiOnchange(index) {
       this.pageNum = index;
       this.getAnalystListDtail();
+    },
+
+    // 显示战绩管理
+    showExploitsDetail(item) {
+      this.analystId = item.id;
+      this.exploitsVisible = true;
+    },
+    closeDialog() {
+      this.exploitsVisible = false;
     }
   },
   mounted() {

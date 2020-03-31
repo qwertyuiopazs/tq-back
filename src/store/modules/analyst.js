@@ -1,12 +1,14 @@
 import {
   getAnalystList,
   getAnalystPage,
-  getAnalysisContentPage
+  getAnalysisContentPage,
+  getPromoteGameRecord
 } from "@/api/analyst";
 
 const state = {
   analystList: {},
-  analysisContentInfo: {}
+  analysisContentInfo: {},
+  exploitsListInfo: {}
 };
 
 const mutations = {
@@ -15,6 +17,9 @@ const mutations = {
   },
   ANALYSISCONTENT_LIST: (state, list) => {
     state.analysisContentInfo = list;
+  },
+  EXPLOITS_LIST: (state, list) => {
+    state.exploitsListInfo = list;
   }
 };
 
@@ -50,6 +55,20 @@ const actions = {
         .then(data => {
           const list = data.data ? data.data : {};
           commit("ANALYSISCONTENT_LIST", list);
+          resolve();
+        })
+        .catch(error => {
+          reject(error);
+        });
+    });
+  },
+  // 分析师战绩
+  getPromoteGameRecord({ commit }, param) {
+    return new Promise((resolve, reject) => {
+      getPromoteGameRecord(param)
+        .then(data => {
+          const list = data.data ? data.data : {};
+          commit("EXPLOITS_LIST", list);
           resolve();
         })
         .catch(error => {
