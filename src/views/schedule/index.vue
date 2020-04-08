@@ -82,7 +82,7 @@
           <el-pagination
             background
             @current-change="pagenatiOnchange"
-            layout="prev, pager, next"
+            layout="total, prev, pager, next"
             :page-size="scheduleInfo.size"
             :current-page="scheduleInfo.current"
             :total="scheduleInfo.total"
@@ -464,12 +464,12 @@ export default {
     // 上传标识图
     handleQrSuccess(res, file) {
       this.form.markImageUrl = res.msg ? res.msg : "";
-      this.$message({ type: "success", message: "二维码上传成功" });
+      this.$message({ type: "success", message: "标识图上传成功" });
     },
     beforeQrUpload(file) {
       const isLt1M = file.size / 1024 / 1024 < 1;
       if (!isLt1M) {
-        this.$message.error("二维码图片大小不能超过 1MB!");
+        this.$message.error("图片大小不能超过 1MB!");
       }
       return isLt1M;
     },
@@ -477,13 +477,13 @@ export default {
     // 上传队伍一图标
     handleT1Success(res, file) {
       this.form.teamOneUrl = res.msg ? res.msg : "";
-      this.$message({ type: "success", message: "二维码上传成功" });
+      this.$message({ type: "success", message: "队伍一图标上传成功" });
     },
 
     // 上传队伍二图标
     handleT2Success(res, file) {
       this.form.teamTwoUrl = res.msg ? res.msg : "";
-      this.$message({ type: "success", message: "二维码上传成功" });
+      this.$message({ type: "success", message: "队伍二图标上传成功" });
     },
 
     // 分页

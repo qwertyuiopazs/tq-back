@@ -84,7 +84,7 @@
           <el-pagination
             background
             @current-change="pagenatiOnchange"
-            layout="prev, pager, next"
+            layout="total, prev, pager, next"
             :page-size="analystListInfo.size"
             :current-page="analystListInfo.current"
             :total="analystListInfo.total"

@@ -3,7 +3,7 @@
     <div class="list_wrap">
       <el-card>
         <div slot="header" class="clearfix">
-          <span><b>分析内容管理</b></span>
+          <span><b>盘口新闻</b></span>
         </div>
         <el-button
           v-if="multipleSelection.length"
@@ -21,8 +21,13 @@
         >
           <el-table-column type="selection" width="40"> </el-table-column>
           <el-table-column label="编号" width="50" prop="id" />
-          <el-table-column label="标题" width="200" prop="title" />
-          <el-table-column label="分析内容" prop="analysisContent" />
+          <el-table-column
+            label="创建时间"
+            width="200"
+            prop="createDateTime"
+            class="content"
+          />
+          <el-table-column label="标题" prop="title" />
           <el-table-column label="操作">
             <template slot-scope="scope">
               <el-button size="mini" @click="handleEdit(scope.row)"
@@ -47,7 +52,7 @@
           <el-pagination
             background
             @current-change="pagenatiOnchange"
-            layout="prev, pager, next"
+            layout="total, prev, pager, next"
             :page-size="analysisContentInfo.size"
             :current-page="analysisContentInfo.current"
             :total="analysisContentInfo.total"
@@ -360,7 +365,11 @@ export default {
 <style lang="scss">
 .analystContent_wrap {
   padding-bottom: 50px;
-
+  .content {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+  }
   .main_title {
     text-align: center;
   }

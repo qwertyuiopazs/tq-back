@@ -90,7 +90,7 @@
           <el-pagination
             background
             @current-change="pagenatiOnchange"
-            layout="prev, pager, next"
+            layout="total, prev, pager, next"
             :page-size="userListInfo.size"
             :current-page="userListInfo.current"
             :total="userListInfo.total"
@@ -461,12 +461,12 @@ export default {
     // 上传标识图
     handleQrSuccess(res, file) {
       this.form.avatarPath = res.msg ? res.msg : "";
-      this.$message({ type: "success", message: "二维码上传成功" });
+      this.$message({ type: "success", message: "头像上传成功" });
     },
     beforeQrUpload(file) {
       const isLt1M = file.size / 1024 / 1024 < 1;
       if (!isLt1M) {
-        this.$message.error("二维码图片大小不能超过 1MB!");
+        this.$message.error("头像图片大小不能超过 1MB!");
       }
       return isLt1M;
     },

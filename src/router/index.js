@@ -83,22 +83,22 @@ export const constantRoutes = [
   {
     path: "/analyst",
     component: Layout,
-    name: "Analyst",
-    redirect: "/analyst/index",
-    meta: { title: "分析管理", icon: "example" },
+    // name: "Analyst",
+    // redirect: "/analyst/index",
+    // meta: { title: "推手管理", icon: "example" },
     children: [
       {
         path: "index",
-        name: "analyst/index",
+        name: "analyst",
         component: () => import("@/views/analyst/index"),
-        meta: { title: "分析师管理", icon: "user" }
-      },
-      {
-        path: "analystContent",
-        name: "analyst/analystContent",
-        component: () => import("@/views/analyst/analystContent"),
-        meta: { title: "分析内容管理", icon: "form" }
+        meta: { title: "推手管理", icon: "example" }
       }
+      // {
+      //   path: "analystContent",
+      //   name: "analyst/analystContent",
+      //   component: () => import("@/views/analyst/analystContent"),
+      //   meta: { title: "分析内容管理", icon: "form" }
+      // }
     ]
   },
   {
@@ -122,6 +122,19 @@ export const constantRoutes = [
       }
     ]
   },
+  {
+    path: "/news",
+    component: Layout,
+    children: [
+      {
+        path: "index",
+        name: "news",
+        component: () => import("@/views/analyst/analystContent"),
+        meta: { title: "盘口新闻", icon: "form" }
+      }
+    ]
+  },
+  
 
   /**
    * 两个子路由
