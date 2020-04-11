@@ -7,6 +7,7 @@ import user from "./modules/user";
 import banner from "./modules/banner";
 import analyst from "./modules/analyst";
 import schedule from "./modules/schedule";
+import configuration from "./modules/configuration";
 
 Vue.use(Vuex);
 
@@ -17,7 +18,8 @@ const store = new Vuex.Store({
     user,
     banner,
     analyst,
-    schedule
+    schedule,
+    configuration
   },
   getters
 });

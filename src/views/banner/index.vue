@@ -217,7 +217,7 @@ export default {
     handleDelete() {
       if (this.selectedList.length === 0) {
         this.$message({
-          message: "卧槽，你先选个图片啊",
+          message: "请选择图片",
           type: "error"
         });
         return;

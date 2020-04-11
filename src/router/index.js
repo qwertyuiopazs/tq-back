@@ -134,7 +134,19 @@ export const constantRoutes = [
       }
     ]
   },
-  
+  {
+    path: "/configuration",
+    component: Layout,
+    meta: { title: "网站配置", icon: "example" },
+    children: [
+      {
+        path: "contact",
+        name: "configuration-contact",
+        component: () => import("@/views/configuration/contact"),
+        meta: { title: "联系方式", icon: "form" }
+      }
+    ]
+  },
 
   /**
    * 两个子路由

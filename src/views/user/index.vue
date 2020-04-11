@@ -100,7 +100,7 @@
       </el-card>
     </div>
     <el-dialog
-      title="添加用户"
+      :title="isEdit ? '编辑用户信息' : '添加用户'"
       :visible.sync="dialogVisible"
       width="600px"
       :before-close="handleClose"
@@ -124,6 +124,7 @@
             <el-input v-model="form.accountNumber"></el-input>
           </el-form-item>
           <el-form-item
+            v-if="!isEdit"
             label="密码"
             type="password"
             :style="{ width: '300px' }"
